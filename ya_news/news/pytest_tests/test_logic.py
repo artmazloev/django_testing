@@ -76,3 +76,4 @@ def test_not_author_cant_edit_comment(not_author_client, comment, url_edit):
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment.refresh_from_db()
     assert comment.text == COMMENT_TEXT
+    

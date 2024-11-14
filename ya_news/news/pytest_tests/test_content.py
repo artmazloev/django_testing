@@ -45,3 +45,4 @@ def test_comments_order(client, t_comment, url_detail):
     all_timestamps = [comment.created for comment in all_comments]
     sorted_timestamps = sorted(all_timestamps)
     assert all_timestamps == sorted_timestamps
+    
