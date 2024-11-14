@@ -36,4 +36,3 @@ class BaseTestNote(BaseTestClass):
             author=cls.author,
             slug='note_slug'
         )
-        

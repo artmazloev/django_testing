@@ -86,4 +86,3 @@ class TestRoutes(BaseTestNote):
                 redirect_url = f'{self.URL_LOGIN}?next={url}'
                 response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
-                

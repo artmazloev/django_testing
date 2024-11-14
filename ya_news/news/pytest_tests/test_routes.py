@@ -66,4 +66,3 @@ def test_redirects(client, url, url_login):
     expected_url = f'{url_login}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
-    

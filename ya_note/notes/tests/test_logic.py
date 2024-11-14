@@ -96,4 +96,3 @@ class TestEditDeleteNote(BaseTestNote):
         response = self.reader_client.post(url)
         self.assertEqual(Note.objects.count(), 1)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-        
