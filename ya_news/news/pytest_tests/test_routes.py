@@ -1,64 +1,68 @@
 from http import HTTPStatus
 
 import pytest
-from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
-news_id = pytest.lazy_fixture('news_id')
-author_client = pytest.lazy_fixture('author_client')
-not_author_client = pytest.lazy_fixture('not_author_client')
-comment_id = pytest.lazy_fixture('comment_id')
+URL_DELETE = pytest.lazy_fixture('url_delete')
+URL_DETAIL = pytest.lazy_fixture('url_detail')
+URL_EDIT = pytest.lazy_fixture('url_edit')
+URL_HOME = pytest.lazy_fixture('url_home')
+URL_LOGIN = pytest.lazy_fixture('url_login')
+URL_LOGOUT = pytest.lazy_fixture('url_logout')
+URL_SIGNUP = pytest.lazy_fixture('url_signup')
+
+
+def test_home_availability_for_anonymous_user(client, url_home):
+    """Анонимному пользователю доступна главная страница."""
+    response = client.get(url_home)
+    assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(
-    'name, object_id',
-    (
-        ('news:home', None),
-        ('news:detail', news_id),
-        ('users:login', None),
-        ('users:logout', None),
-        ('users:signup', None),
-        ('news:edit', comment_id),
-        ('news:delete', comment_id),
-    )
+    'url',
+    (URL_HOME, URL_LOGIN, URL_LOGOUT, URL_SIGNUP)
 )
-def test_availability_for_anon_user(client, name, object_id):
-    """Проверка доступности страниц и редиректов для анонимного пользователя.
-
-    Проверяются следующие страницы: главная, страница новости, страница логина,
-    страница разлогирования, страница регистрации.
-    """
-    url = reverse(name, args=object_id)
+def test_pages_availability_for_anonymous_user(client, url):
+    """Доступные страницы для анонимных пользователей."""
     response = client.get(url)
-    if name in ('news:edit', 'news:delete'):
-        login_url = reverse('users:login')
-        expected_url = f'{login_url}?next={url}'
-        assertRedirects(response, expected_url)
-    else:
-        assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(
-    'user_client, expected_result',
+    'url',
+    (URL_DETAIL, URL_HOME),
+)
+def test_pages_availability_for_auth_user(not_author_client, url):
+    """Доступные страницы для авторизованного пользователя."""
+    response = not_author_client.get(url)
+    assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.parametrize(
+    'parametrized_client, expected_status',
     (
-        (author_client, HTTPStatus.OK),
-        (not_author_client, HTTPStatus.NOT_FOUND)
-    )
+        (pytest.lazy_fixture('not_author_client'), HTTPStatus.NOT_FOUND),
+        (pytest.lazy_fixture('author_client'), HTTPStatus.OK)
+    ),
 )
 @pytest.mark.parametrize(
-    'name, args',
-    (
-        ('news:edit', comment_id),
-        ('news:delete', comment_id),
-    )
+    'url',
+    (URL_EDIT, URL_DELETE),
 )
-def test_availability_for_comment_edit_and_delete(
-    user_client, expected_result, name, args
+def test_pages_availability_for_different_users(
+        parametrized_client, url, expected_status
 ):
-    """Тест доступности страниц редактирования и удаления комментариев.
+    """Удаление и редактирование для разных пользователей."""
+    response = parametrized_client.get(url)
+    assert response.status_code == expected_status
 
-    Для автора и не автора
-    """
-    url = reverse(name, args=args)
-    response = user_client.get(url)
-    assert response.status_code == expected_result
+
+@pytest.mark.parametrize(
+    'url',
+    (URL_EDIT, URL_DELETE),
+)
+def test_redirects(client, url, url_login):
+    """Тесты редиректов."""
+    expected_url = f'{url_login}?next={url}'
+    response = client.get(url)
+    assertRedirects(response, expected_url)

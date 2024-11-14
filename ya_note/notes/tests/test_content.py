@@ -1,34 +1,34 @@
+from django.urls import reverse
+
 from notes.forms import NoteForm
-from .common import TestCommon
+from .fixtures import BaseTestNote
 
 
-class TestContent(TestCommon):
-    """Класс для теста контента."""
+class TestContent(BaseTestNote):
+    """Тесты контента."""
 
-    def test_auth_user_has_form_create_delete(self):
-        """На страницах создания и редактирования заметки есть объект формы.
+    def test_notes_list_for_different_users(self):
+        """Тесты доступа заметок для разных пользователей."""
+        url = reverse('notes:list')
+        clients_note_in_list = (
+            (self.author_client, True),
+            (self.reader_client, False)
+        )
+        for client, note_in_list in clients_note_in_list:
+            with self.subTest():
+                response = client.get(url)
+                object_list = response.context['object_list']
+                self.assertIs((self.note in object_list), note_in_list)
 
-        Для авторизоавнного пользователя
-        """
-        urls = (self.add_url, self.edit_url)
-        for url in urls:
-            with self.subTest(url=url):
+    def test_pages_contains_form(self):
+        """Тест формы."""
+        urls = (
+            ('notes:add', None),
+            ('notes:edit', (self.note.slug,)),
+        )
+        for name, args in urls:
+            with self.subTest():
+                url = reverse(name, args=args)
                 response = self.author_client.get(url)
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], NoteForm)
-
-    def test_notes_list_for_different_users(self):
-        """В списке одного пользователя нет заметок другого пользователя.
-
-        Заметка передаётся в список, в словарь context.
-        """
-        users_statuses = (
-            (self.author, True),
-            (self.not_author, False)
-        )
-        for user, result in users_statuses:
-            with self.subTest(user=user):
-                self.client.force_login(user)
-                response = self.client.get(self.list_url)
-                object_list = response.context['object_list']
-                self.assertIs(self.note in object_list, result)
