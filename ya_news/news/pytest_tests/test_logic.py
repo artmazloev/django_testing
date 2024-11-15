@@ -18,15 +18,17 @@ def test_anonymous_user_cant_create_comment(client, url_detail):
     """Анонимный пользователь не может создать коммент."""
     client.post(url_detail, data=COMMENT_FORM_DATA)
     comments_count = Comment.objects.count()
-    assert comments_count == 0
+    assert comments_count == 0 #Комментарий ревьюера:#тут писал про сравнивание не с конкретным числом, а с числом комментов в БД на начало теста, см коммент из прошлого ревью
+                               #это нужно поправить везде
+                               #то есть находишь кол-во сущностей в БД на начало теста, выполняешь действия и в конце заново находишь записи в БД и смотришь как изменилось или не изменилось это число
 
 
 def test_user_can_create_comment(new, author_client, author, url_detail):
     """Авторизованный пользователь может создать коммент."""
     response = author_client.post(url_detail, data=COMMENT_FORM_DATA)
-    assertRedirects(response, f'{url_detail}#comments')
+    assertRedirects(response, f'{url_detail}#comments') #Комментарий ревьюера: а у нас же для этого отдельный тест есть
     comments_count = Comment.objects.count()
-    assert comments_count == 1
+    assert comments_count == 1 #Комментарий ревьюера: коммент с подсчетом поправить везде
     comment = Comment.objects.get()
     assert comment.text == COMMENT_TEXT
     assert comment.news == new

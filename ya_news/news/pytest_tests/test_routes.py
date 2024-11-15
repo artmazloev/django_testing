@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from pytest_django.asserts import assertRedirects
+#Комментарий ревьюера для редиректов (два урла) тоже лучше сразу тут расчитать
 
 URL_DELETE = pytest.lazy_fixture('url_delete')
 URL_DETAIL = pytest.lazy_fixture('url_detail')
@@ -10,8 +11,8 @@ URL_HOME = pytest.lazy_fixture('url_home')
 URL_LOGIN = pytest.lazy_fixture('url_login')
 URL_LOGOUT = pytest.lazy_fixture('url_logout')
 URL_SIGNUP = pytest.lazy_fixture('url_signup')
-
-
+#Комментарий ревьюера: клиентов тоже лучше один раз на уровне модуля вычислить, а дальше использовать
+#Комментарий ревьюера: во всем модуле нам достаточно только двух функций,  одна на все статусы, втора на редиректы
 def test_home_availability_for_anonymous_user(client, url_home):
     """Анонимному пользователю доступна главная страница."""
     response = client.get(url_home)

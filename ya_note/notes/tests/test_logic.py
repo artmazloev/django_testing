@@ -19,7 +19,8 @@ class TestNote(BaseTestClass):
         url = reverse('notes:add')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), 1) #Комментарий ревьюера: такой же коммент про кол-во
+
         new_note = Note.objects.get()
         self.assertEqual(new_note.title, self.form_data['title'])
         self.assertEqual(new_note.text, self.form_data['text'])
