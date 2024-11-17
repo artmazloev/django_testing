@@ -16,10 +16,11 @@ class TestNote(BaseTestClass):
 
     def test_user_can_create_note(self):
         """Пользователь может создать заметку."""
+        notes_count = Note.objects.count()
         url = reverse('notes:add')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 1) #Комментарий ревьюера: такой же коммент про кол-во
+        self.assertEqual(Note.objects.count(), notes_count + 1)
 
         new_note = Note.objects.get()
         self.assertEqual(new_note.title, self.form_data['title'])
@@ -29,20 +30,22 @@ class TestNote(BaseTestClass):
 
     def test_anonymous_user_cant_create_note(self):
         """Аноним не может создать заметку."""
+        notes_count = Note.objects.count()
         url = reverse('notes:add')
         response = self.client.post(url, data=self.form_data)
         login_url = reverse('users:login')
         expected_url = f'{login_url}?next={url}'
         self.assertRedirects(response, expected_url)
-        self.assertEqual(Note.objects.count(), 0)
+        self.assertEqual(Note.objects.count(), notes_count)
 
     def test_empty_slug(self):
         """Тест на пустой слаг."""
+        notes_count = Note.objects.count()
         url = reverse('notes:add')
         self.form_data.pop('slug')
         response = self.author_client.post(url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), notes_count + 1)
         new_note = Note.objects.get()
         expected_slug = slugify(self.form_data['title'])
         self.assertEqual(new_note.slug, expected_slug)
@@ -53,6 +56,7 @@ class TestEditDeleteNote(BaseTestNote):
 
     def test_not_unique_slug(self):
         """Тест на неуникальный слаг."""
+        notes_count = Note.objects.count()
         url = reverse('notes:add')
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(url, data=self.form_data)
@@ -62,7 +66,7 @@ class TestEditDeleteNote(BaseTestNote):
             'slug',
             errors=(self.note.slug + WARNING)
         )
-        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), notes_count)
 
     def test_author_can_edit_note(self):
         """Автор может редактировать заметку."""
@@ -86,14 +90,16 @@ class TestEditDeleteNote(BaseTestNote):
 
     def test_author_can_delete_note(self):
         """Автор может удалить заметку."""
+        notes_count = Note.objects.count()
         url = reverse('notes:delete', args=(self.note.slug,))
         response = self.author_client.post(url)
         self.assertRedirects(response, reverse('notes:success'))
-        self.assertEqual(Note.objects.count(), 0)
+        self.assertEqual(Note.objects.count(), notes_count - 1)
 
     def test_other_user_cant_delete_note(self):
         """Не автор не может удалить заметку."""
+        notes_count = Note.objects.count()
         url = reverse('notes:delete', args=(self.note.slug,))
         response = self.reader_client.post(url)
-        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), notes_count)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
