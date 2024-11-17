@@ -1,60 +1,41 @@
 from http import HTTPStatus
 
 import pytest
+from django.test.client import Client
+from pytest_lazyfixture import lazy_fixture
 from pytest_django.asserts import assertRedirects
-#Комментарий ревьюера для редиректов (два урла) тоже лучше сразу тут расчитать
+# Комментарий ревьюера для редиректов (два урла)
+# тоже лучше сразу тут расчитать
 
-URL_DELETE = pytest.lazy_fixture('url_delete')
-URL_DETAIL = pytest.lazy_fixture('url_detail')
-URL_EDIT = pytest.lazy_fixture('url_edit')
-URL_HOME = pytest.lazy_fixture('url_home')
-URL_LOGIN = pytest.lazy_fixture('url_login')
-URL_LOGOUT = pytest.lazy_fixture('url_logout')
-URL_SIGNUP = pytest.lazy_fixture('url_signup')
-#Комментарий ревьюера: клиентов тоже лучше один раз на уровне модуля вычислить, а дальше использовать
-#Комментарий ревьюера: во всем модуле нам достаточно только двух функций,  одна на все статусы, втора на редиректы
-def test_home_availability_for_anonymous_user(client, url_home):
+OK = HTTPStatus.OK
+NOT_FONUD = HTTPStatus.NOT_FOUND
+
+client = Client()
+not_author_client = lazy_fixture('not_author_client')
+author_client = lazy_fixture('author_client')
+URL_DELETE = lazy_fixture('url_delete')
+URL_DETAIL = lazy_fixture('url_detail')
+URL_EDIT = lazy_fixture('url_edit')
+URL_HOME = lazy_fixture('url_home')
+URL_LOGIN = lazy_fixture('url_login')
+URL_LOGOUT = lazy_fixture('url_logout')
+URL_SIGNUP = lazy_fixture('url_signup')
+
+
+@pytest.mark.parametrize('p_client, url, expected_status', (
+                         (client, URL_HOME, OK),
+                         (client, URL_LOGIN, OK),
+                         (client, URL_LOGOUT, OK),
+                         (client, URL_SIGNUP, OK),
+                         (not_author_client, URL_DETAIL, OK),
+                         (not_author_client, URL_HOME, OK),
+                         (not_author_client, URL_EDIT, NOT_FONUD),
+                         (not_author_client, URL_DELETE, NOT_FONUD),
+                         (author_client, URL_EDIT, OK),
+                         (author_client, URL_DELETE, OK)))
+def test_home_availability_for_anonymous_user(p_client, url, expected_status):
     """Анонимному пользователю доступна главная страница."""
-    response = client.get(url_home)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize(
-    'url',
-    (URL_HOME, URL_LOGIN, URL_LOGOUT, URL_SIGNUP)
-)
-def test_pages_availability_for_anonymous_user(client, url):
-    """Доступные страницы для анонимных пользователей."""
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize(
-    'url',
-    (URL_DETAIL, URL_HOME),
-)
-def test_pages_availability_for_auth_user(not_author_client, url):
-    """Доступные страницы для авторизованного пользователя."""
-    response = not_author_client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize(
-    'parametrized_client, expected_status',
-    (
-        (pytest.lazy_fixture('not_author_client'), HTTPStatus.NOT_FOUND),
-        (pytest.lazy_fixture('author_client'), HTTPStatus.OK)
-    ),
-)
-@pytest.mark.parametrize(
-    'url',
-    (URL_EDIT, URL_DELETE),
-)
-def test_pages_availability_for_different_users(
-        parametrized_client, url, expected_status
-):
-    """Удаление и редактирование для разных пользователей."""
-    response = parametrized_client.get(url)
+    response = p_client.get(url)
     assert response.status_code == expected_status
 
 
