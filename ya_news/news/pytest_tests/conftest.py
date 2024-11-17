@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
-
 import pytest
+
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from news.models import News, Comment #Комментарий ревьюера: Сортировка импортов по PEP8 везде
+# Комментарий ревьюера: Сортировка импортов по PEP8 везде
+from news.models import News, Comment
 
 COMMENT_TEXT = 'Текст комментария'
 
