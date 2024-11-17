@@ -24,7 +24,6 @@ class TestRoutes(BaseTestNote):
         cls.URL_DETAIL = reverse('notes:detail', args=(cls.note.slug,))
         cls.URL_EDIT = reverse('notes:edit', args=(cls.note.slug,))
         cls.URL_DELETE = reverse('notes:delete', args=(cls.note.slug,))
-        
 
     def test_pages_availability_for_anonymous_user(self):
         params = (
