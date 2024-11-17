@@ -6,7 +6,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from news.models import Comment, News 
+from news.models import Comment, News
 
 COMMENT_TEXT = 'Текст комментария'
 
