@@ -1,4 +1,6 @@
 import pytest
+
+from pytest_lazyfixture import lazy_fixture
 from django.conf import settings
 
 from news.forms import CommentForm
@@ -7,8 +9,8 @@ from news.forms import CommentForm
 @pytest.mark.parametrize(
     'param_client, expected_value',
     (
-        (pytest.lazy_fixture('author_client'), True),
-        (pytest.lazy_fixture('not_author_client'), False),
+        (lazy_fixture('author_client'), True),
+        (lazy_fixture('not_author_client'), False),
     )
 )
 def test_pages_contains_form(param_client, expected_value, url_detail):
