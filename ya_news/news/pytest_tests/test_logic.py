@@ -27,8 +27,8 @@ def test_user_can_create_comment(new, author_client, author, url_detail):
     author_client.post(url_detail, data=COMMENT_FORM_DATA)
     comments_count = Comment.objects.count()
     assert comments_count == comments_count_before + 1
-    comment = Comment.objects.filter(author=author_client).last()
-    assert comment.text == COMMENT_TEXT
+    comment = Comment.objects.filter(author=author).last()
+    assert comment.text == COMMENT_TEXT, dir(author_client)
     assert comment.news == new
     assert comment.author == author
 
