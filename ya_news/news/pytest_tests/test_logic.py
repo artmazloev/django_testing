@@ -20,6 +20,7 @@ def test_anonymous_user_cant_create_comment(client, url_detail):
     comments_count = Comment.objects.count()
     assert comments_count == comments_cout_before
 
+
 def test_user_can_create_comment(new, author_client, author, url_detail):
     """Авторизованный пользователь может создать коммент."""
     comments_count_before = Comment.objects.count()
@@ -30,6 +31,7 @@ def test_user_can_create_comment(new, author_client, author, url_detail):
     assert comment.text == COMMENT_TEXT
     assert comment.news == new
     assert comment.author == author
+
 
 def test_user_cant_use_bad_words(author_client, url_detail):
     """Автор - культурный человек."""
@@ -44,12 +46,14 @@ def test_user_cant_use_bad_words(author_client, url_detail):
     comments_count = Comment.objects.count()
     assert comments_count == comments_count_before
 
+
 def test_author_can_delete_comment(author_client, url_delete):
     """Автор может удалять коммент."""
     comments_count_before = Comment.objects.count()
     author_client.delete(url_delete)
     comments_count = Comment.objects.count()
     assert comments_count == comments_count_before - 1
+
 
 def test_not_author_cant_delete_comment(not_author_client, url_delete):
     """Не автор не может удалять коммент."""
@@ -59,11 +63,13 @@ def test_not_author_cant_delete_comment(not_author_client, url_delete):
     comments_count = Comment.objects.count()
     assert comments_count == comments_count_before
 
+
 def test_author_can_edit_comment(author_client, comment, url_edit):
     """Автор может редактировать коммент."""
     author_client.post(url_edit, data=COMMENT_FORM_DATA)
     comment.refresh_from_db()
     assert comment.text == COMMENT_FORM_DATA['text']
+
 
 def test_not_author_cant_edit_comment(not_author_client, comment, url_edit):
     """Автор не может редактировать чужой коммент."""
